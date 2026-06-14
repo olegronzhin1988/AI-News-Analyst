@@ -4,6 +4,8 @@ from fastapi import FastAPI
 import uvicorn
 from contextlib import asynccontextmanager
 from database import init_db
+from routers.analysis import analysis_router
+
 
 # Decorated function for lifespan app, to activate db
 # on server/app start
@@ -20,8 +22,8 @@ app = FastAPI(lifespan=lifespan,
               description="FastAPI + AI service, collects fresh news on topic",
               version="1.0.0")
 
-# Connecting routers
-#app.include_router(...)
+# Connecting analysis router
+app.include_router(analysis_router)
 
 # Default root endpoint
 @app.get("/")

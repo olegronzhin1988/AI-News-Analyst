@@ -34,4 +34,4 @@ class AnalysisRecord(Base):
 # Analysis AI Provider
     ai_provider_used: Mapped[str]
 # Analysis creation date and time
-    created_at:Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    created_at:Mapped[datetime] = mapped_column(default=lambda:datetime.now(timezone.utc))

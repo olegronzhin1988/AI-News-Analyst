@@ -30,10 +30,11 @@ ANALYSIS_PROMPT = f"{PROMPT_ROLE}\n{PROMPT_TOPICS}\n{PROMPT_DATA_INPUT}\n{PROMPT
 
 # service function to add articles data into ai agent prompt
 def _build_prompt(topic, articles):
+    articles = articles[:10]
     articles_json = [
         {
             "title": article.get("title", ""),
-            "description": article.get("description", "")[:300],
+            "description": (article.get("description") or "")[:300],
             "url": article.get("url", ""),
             "published_at": article.get("published_at", ""),
             "source": article.get("source", ""),

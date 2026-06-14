@@ -16,7 +16,8 @@ engine = create_async_engine(DATABASE_URL)
 new_session = async_sessionmaker(engine, expire_on_commit=False)
 
 # Parent class for other chart/sheet/etc. classes
-Base = DeclarativeBase()
+class Base(DeclarativeBase):
+    pass
 
 # Dependency function to get database session
 async def get_db():
