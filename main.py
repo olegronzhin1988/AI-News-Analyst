@@ -28,7 +28,7 @@ app.include_router(analysis_router)
 # Default root endpoint
 @app.get("/")
 async def root():
-    return ({"message":{"You`re on AI News Analyst frontpage"}})
+    return ({"message":"You`re on AI News Analyst frontpage"})
 
 # App autostart with uvicorn
 if __name__=="__main__":

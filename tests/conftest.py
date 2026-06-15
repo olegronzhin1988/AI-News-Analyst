@@ -41,7 +41,7 @@ async def db_session():
 
 # creates client and switches get_db for test db
 @pytest.fixture(scope="function")
-async def client( db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
+async def client( db_session: AsyncSession):
 
 # dependency override
     async def override_get_db():
