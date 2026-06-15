@@ -2,6 +2,7 @@
 
 import re 
 import json
+import httpx
 from groq import AsyncGroq
 from config import settings
 
@@ -66,14 +67,49 @@ async def analyze_articles(topic:str, articles:list, provider="groq"):
 # Build prompt with articles data
     prompt = _build_prompt(topic, articles)
 # Call ai provider with prompt and get raw response
-    if provider == "groq":
-        raw_response = await _call_groq(prompt)
-    else:
-        raise ValueError(f"Unsupported provider: {provider}")
+    providers =[provider]
+    fallback = "openrouter" if provider == "groq" else "groq"
+    providers.append(fallback)
+    last_error = None
+    for prov in providers:
+        try:
+# Provider selector
+            if prov == "groq":
+                raw_response = await _call_groq(prompt)
+            elif prov == "openrouter":
+                raw_response = await _call_openrouter(prompt)           
+            else:
+                raise ValueError(f"Unsupported provider: {provider}")
 
 # Parse raw response into dict
-    result_dict = _parse_response(raw_response)
+            result_dict = _parse_response(raw_response)
 # Set provider name in result dict
-    provider_name = provider
+            provider_name = prov
+            return (result_dict, provider_name)
+        except Exception as exc:
+            last_error = exc
+            continue
 
-    return (result_dict, provider_name)
+# All providers failed exception        
+    raise RuntimeError(f"All providers failed: {last_error}")
+
+#Service function to call  openrouter api with prompt and return response
+async def _call_openrouter(prompt:str) ->str:
+# creating openrouter request
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {settings.openrouter_api_key}",
+        "Content-Type": "application/json"
+    }
+    body = {
+        "model": settings.openrouter_model,
+        "messages": [{"role": "user", "content": prompt}]
+    }
+
+# Sending request
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.post(url, headers=headers, json=body)
+    data = response.json()
+
+# Returning response
+    return data["choices"][0]["message"]["content"]

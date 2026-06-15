@@ -10,6 +10,7 @@ Tests for AI News Analyst endpoints:
 import pytest
 from httpx import AsyncClient
 from unittest.mock import patch, AsyncMock
+import json
 
 #MOCKS
 MOCK_ARTICLES = [
@@ -178,7 +179,7 @@ async def test_get_by_id(client:AsyncClient):
         with patch("routers.analysis.analyze_articles", new_callable=AsyncMock) as mock_analyze:
             mock_analyze.return_value = (MOCK_RESULT, "groq")
 
-        # Making POST request
+# Making POST request
             response = await client.post("/analysis/", json={
                 "topic":"cars",
                 "days":30,
@@ -200,3 +201,56 @@ async def test_get_by_id(client:AsyncClient):
     assert data["ai_provider_used"] == "groq"
     assert data["summary"] == "Articles cover cars history, technology and prices"
     assert data["key_events"] == ["car history", "car technonly", "car prices", "cars"]
+
+# groq fails as provider check, POST
+async def test_groq_fails_fallback_to_openrouter(client:AsyncClient):
+    with patch("routers.analysis.NewsClient") as MockClient:
+
+# fetch_articles setup, making post
+        MockClient.return_value.fetch_articles=AsyncMock(return_value=MOCK_ARTICLES)
+
+# Making groq unavailable
+        with patch("services.ai_agent._call_groq",  new_callable=AsyncMock) as mock_groq:
+            mock_groq.side_effect=Exception("Groq unavailable")
+
+# Checking openrouter
+            with patch("services.ai_agent._call_openrouter", new_callable=AsyncMock) as mock_openrouter:
+                mock_openrouter.return_value = json.dumps(MOCK_RESULT)
+
+# making POST request
+                response = await client.post("/analysis/", json={
+                    "topic":"cars",
+                    "days":30,
+                    "language":"en"
+                })
+
+ # Result check
+    assert response.status_code == 201
+    assert response.json()["ai_provider_used"] == "openrouter"
+
+# All prociders fail check, POST    
+async def test_all_providers_fail(client:AsyncClient):
+    with patch("routers.analysis.NewsClient") as MockClient:
+
+# fetch_articles setup, making post
+        MockClient.return_value.fetch_articles=AsyncMock(return_value=MOCK_ARTICLES)
+
+# Making groq unavailable
+        with patch("services.ai_agent._call_groq",  new_callable=AsyncMock) as mock_groq:
+            mock_groq.side_effect=Exception("Groq unavailable")
+
+# Making openrouter unavailable
+            with patch("services.ai_agent._call_openrouter", new_callable=AsyncMock) as mock_openrouter:
+                mock_openrouter.side_effect=Exception("Openrouter unavailable")
+
+# making POST request
+                response = await client.post("/analysis/", json={
+                    "topic":"cars",
+                    "days":30,
+                    "language":"en"
+                })
+
+ # Result check
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Runtime error"
+ 
