@@ -1,5 +1,6 @@
 # AI News Analyst API
 
+[![CI](https://github.com/olegronzhin1988/AI-News-Analyst/actions/workflows/ci.yml/badge.svg)](https://github.com/olegronzhin1988/AI-News-Analyst/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.136+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red)](https://sqlalchemy.org)
@@ -42,6 +43,9 @@ A FastAPI service that fetches recent news on any topic via **NewsAPI** and runs
 ## Project Structure
 
 ```
+├── .github/
+│   └── workflows/
+│       └── ci.yml             # GitHub Actions CI — runs tests on push/PR
 ├── main.py                   # FastAPI app entry point, lifespan
 ├── config.py                 # Settings via pydantic-settings (.env)
 ├── database.py               # Async engine, session factory, Base
@@ -215,10 +219,16 @@ All 9 tests use mocked external APIs — no real network calls or API keys requi
 
 ---
 
+## Continuous Integration
+
+Every push and pull request to `main` triggers the test suite via GitHub Actions — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml). The workflow installs dependencies, generates a `.env` with placeholder values (tests rely entirely on mocks, no real API keys needed), and runs `pytest`.
+
+---
+
 ## Known Limitations / TODO
 
 - [ ] Pagination parameters exposed via query string (`limit`, `offset` already supported internally)
 - [ ] Background task mode for slow providers
 - [ ] Alembic migrations (currently using `create_all`)
 - [ ] Docker + docker-compose setup
-- [ ] GitHub Actions CI
+- [ ] Simple static HTML interface served via FastAPI's `StaticFiles`
