@@ -5,6 +5,7 @@ import uvicorn
 from contextlib import asynccontextmanager
 from database import init_db
 from routers.analysis import analysis_router
+from fastapi.staticfiles import StaticFiles
 
 
 # Decorated function for lifespan app, to activate db
@@ -29,6 +30,9 @@ app.include_router(analysis_router)
 @app.get("/")
 async def root():
     return ({"message":"You`re on AI News Analyst frontpage"})
+
+# StaticFiles mount
+app.mount("/ui", StaticFiles(directory="static", html=True), name="static")
 
 # App autostart with uvicorn
 if __name__=="__main__":

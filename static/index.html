@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>AI News Analyst</title>
+</head>
+<body>
+    <h2>AI News Analyst</h2>
+    <p>
+
+    </p>
+    <h3>Input form</h3>
+    <form>
+        <p>Analysis topic</p>
+        <input type="text" id="topic" required>
+        <p>Searh days</p>
+        <input type="number" id="days" min="1" max="30" value="7">
+        <p>language</p>
+        <select id="language" option:en, ru>
+            <option value="en">en</option>
+            <option value="ru">ru</option>
+        </select>
+        <p></p>
+        <button type="submit">  Analyze   </button>
+
+        <div id="result"></div>
+    </form>
+
+</body>
+</html>
